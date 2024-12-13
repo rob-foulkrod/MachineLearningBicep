@@ -39,7 +39,7 @@ az ml workspace provision-network --subscription $subscriptionId -g $resourceGro
 
 $deployment = az deployment group create --name $deploymentName --resource-group $resourceGroupName `
     --template-file $phase2File --debug `
-    --parameters location=$location amlWorkspaceName=$workspaceName storageAccountId=$storageAccountId  `
+    --parameters location=$location amlWorkspaceName=$workspaceName  `
     --query "properties.outputs" `
     --output json
 
