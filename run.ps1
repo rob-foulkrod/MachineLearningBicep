@@ -17,6 +17,11 @@ $currentUserId = az ad signed-in-user show --query id -o tsv
 # Create resource group
 az group create --name $resourceGroupName --location $location
 
+Write-Host "Deploying phase 1"
+Write-Host "Command to execute..."
+Write-Host "az deployment group create --name $deploymentName --resource-group $resourceGroupName --template-file $phase1File --parameters location=$location prefix=$prefix currentUserId=$currentUserId --query properties.outputs --output json"
+Write-Host "---"
+
 # Deploy Bicep file
 $deployment = az deployment group create `
     --name $deploymentName --resource-group $resourceGroupName `
@@ -36,6 +41,11 @@ $workspaceName = az ml workspace list --resource-group $resourceGroupName --subs
 
 az ml workspace provision-network --subscription $subscriptionId -g $resourceGroupName -n $workspaceName
 
+write-host "Deploying phase 2"
+write-host "Command to execute..."
+write-host "az deployment group create --name $deploymentName --resource-group $resourceGroupName --template-file $phase2File --parameters location=$location amlWorkspaceName=$workspaceName --query properties.outputs --output json"
+write-host "---"
+
 $deployment = az deployment group create --name $deploymentName --resource-group $resourceGroupName `
     --template-file $phase2File `
     --parameters location=$location amlWorkspaceName=$workspaceName  `
@@ -46,12 +56,21 @@ $outputs = $deployment | ConvertFrom-Json
 $computeInstanceName = $outputs.computeInstanceName.value
 
 write-host "Enabling Managed Identity for the Compute Instance"
-$id = az ml compute update -n $computeInstanceName -g more-ml-rg -w $workspaceName --identity-type SystemAssigned --query "identity.principal_id" --output tsv
+write-host "Command to execute..."
+write-host "$$id = az ml compute update -n $computeInstanceName -g $resourceGroupName -w $workspaceName --identity-type SystemAssigned --query identity.principal_id --output tsv"
+
+$id = az ml compute update -n $computeInstanceName -g $resourceGroupName -w $workspaceName --identity-type SystemAssigned --query "identity.principal_id" --output tsv
 
 write-host "Assigning Storage File Data Privileged Contributor role to the Compute Instance Managed Identity"
+write-host "Command to execute..."
+write-host "az role assignment create --role 'Storage File Data Privileged Contributor' --assignee $id --scope $storageAccountId"
+
 az role assignment create --role "Storage File Data Privileged Contributor" --assignee $id --scope $storageAccountId
 
 write-host "Restarting the Compute Instance"
+write-host "Command to execute..."
+write-host "az ml compute restart -n $computeInstanceName -g $resourceGroupName -w $workspaceName"
+
 az ml compute restart -n $computeInstanceName -g $resourceGroupName -w $workspaceName
 
 write-host "Completed deployment"
