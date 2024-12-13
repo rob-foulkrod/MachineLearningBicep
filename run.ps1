@@ -21,7 +21,6 @@ az group create --name $resourceGroupName --location $location
 $deployment = az deployment group create `
     --name $deploymentName --resource-group $resourceGroupName `
     --template-file $phase1File `
-    --debug  `
     --parameters location=$location prefix=$prefix currentUserId=$currentUserId `
     --query "properties.outputs" `
     --output json
@@ -38,8 +37,8 @@ $workspaceName = az ml workspace list --resource-group $resourceGroupName --subs
 az ml workspace provision-network --subscription $subscriptionId -g $resourceGroupName -n $workspaceName
 
 $deployment = az deployment group create --name $deploymentName --resource-group $resourceGroupName `
-    --template-file $phase2File --debug `
-    --parameters location=$location amlWorkspaceName=$workspaceName  `
+    --template-file $phase2File`
+--parameters location=$location amlWorkspaceName=$workspaceName  `
     --query "properties.outputs" `
     --output json
 
