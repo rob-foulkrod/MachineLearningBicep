@@ -220,8 +220,8 @@ module currentUserRoleStorageBlobDataContributor 'br/public:avm/ptn/authorizatio
   }
 }
 
-module currentUserRoleStorageBlobDataContributorstorageTableDataContributor 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.1' = {
-  name: 'currentUserRoleStorageTableDataContributorDeployment'
+module currentUserRoleTableDataContributor 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.1' = {
+  name: 'currentUserRoleTableDataContributorDeployment'
   params: {
     roleName: 'Storage Table Data Contributor'
     description: 'Assign Storage Table Data Contributor role to the managed Identity on the ML Workspace'

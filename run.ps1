@@ -1,10 +1,10 @@
 # Define variables
-$phase1File = "phase1.bicep"
-$phase2File = "phase2.bicep"
+$phase1File = "main.bicep"
 
-$resourceGroupName = "demo-ml-rg"
+
+$resourceGroupName = "test-ml-rg"
 $location = "eastus2"
-$deploymentName = "deploy-ml-$(Get-Date -Format 'yyyyMMdd')"
+$deploymentName = "deploy-ml-$(Get-Date -Format 'yyyyMMddHHmmss')"
 $prefix = 'aml'
 
 # get the current users principal id
@@ -17,9 +17,13 @@ $currentUserId = az ad signed-in-user show --query id -o tsv
 # Create resource group
 az group create --name $resourceGroupName --location $location
 
-Write-Host "Deploying phase 1"
+Write-Host "Deploying phase 1 - Creating most Resources"
 Write-Host "Command to execute..."
 Write-Host "az deployment group create --name $deploymentName --resource-group $resourceGroupName --template-file $phase1File --parameters location=$location prefix=$prefix currentUserId=$currentUserId --query properties.outputs --output json"
+
+write-host "Start time: $(Get-Date -Format 'HH:mm:ss')"
+Write-host "Expect this to take approximately 20-25 minutes"
+
 Write-Host "---"
 
 # Deploy Bicep file
@@ -30,6 +34,11 @@ $deployment = az deployment group create `
     --query "properties.outputs" `
     --output json
 
+
+write-host "phase 1 outputs"
+write-host $deployment
+Write-Host "---"
+
 $outputs = $deployment | ConvertFrom-Json
 $storageAccountId = $outputs.storageAccountId.value
 
@@ -39,27 +48,36 @@ $subscriptionId = az account show --query id -o tsv
 #list the ML workspaces in the resourcegroup $resourceGroupName and store the first workspace name in the variable $workspaceName
 $workspaceName = az ml workspace list --resource-group $resourceGroupName --subscription $subscriptionId --query [0].name -o tsv
 
-az ml workspace provision-network --subscription $subscriptionId -g $resourceGroupName -n $workspaceName
-
-write-host "Deploying phase 2"
+Write-Host "Provisioning Network for Workspace"
 write-host "Command to execute..."
-write-host "az deployment group create --name $deploymentName --resource-group $resourceGroupName --template-file $phase2File --parameters location=$location amlWorkspaceName=$workspaceName --query properties.outputs --output json"
+write-host "az ml workspace provision-network --subscription $subscriptionId -g $resourceGroupName -n $workspaceName"
+write-host "Start time: $(Get-Date -Format 'HH:mm:ss')"
+Write-host "Expect this to take approximately 10 minutes"
 write-host "---"
 
-$deployment = az deployment group create --name $deploymentName --resource-group $resourceGroupName `
-    --template-file $phase2File `
-    --parameters location=$location amlWorkspaceName=$workspaceName  `
-    --query "properties.outputs" `
-    --output json
+az ml workspace provision-network --subscription $subscriptionId -g $resourceGroupName -n $workspaceName
 
-$outputs = $deployment | ConvertFrom-Json
-$computeInstanceName = $outputs.computeInstanceName.value
-
-write-host "Enabling Managed Identity for the Compute Instance"
+write-host "Enabling Public Access to Workspace"
 write-host "Command to execute..."
-write-host "$$id = az ml compute update -n $computeInstanceName -g $resourceGroupName -w $workspaceName --identity-type SystemAssigned --query identity.principal_id --output tsv"
+write-host "az ml workspace update --name $workspaceName --resource-group $resourceGroupName --public-network-access Enabled"
+write-host "---"
 
-$id = az ml compute update -n $computeInstanceName -g $resourceGroupName -w $workspaceName --identity-type SystemAssigned --query "identity.principal_id" --output tsv
+az ml workspace update --name $workspaceName --resource-group $resourceGroupName --public-network-access Enabled
+
+$computeInstanceName = $prefix + "ci" + (Get-Date -Format 'yyyyMMddHHmmss')
+
+write-host "Creating Compute Instance"
+write-host "Command to execute..."
+write-host "az ml compute create --name $computeInstanceName --resource-group $resourceGroupName --workspace-name $workspaceName --type ComputeInstance --size STANDARD_DS11_V2 --location $location --identity-type SystemAssigned --query identity.principal_id --output tsv"
+
+$id = az ml compute create --name $computeInstanceName `
+    --resource-group $resourceGroupName `
+    --workspace-name $workspaceName `
+    --type ComputeInstance `
+    --size STANDARD_DS11_V2 `
+    --location $location `
+    --identity-type SystemAssigned `
+    --query "identity.principal_id" --output tsv
 
 write-host "Assigning Storage File Data Privileged Contributor role to the Compute Instance Managed Identity"
 write-host "Command to execute..."
