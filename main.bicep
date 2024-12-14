@@ -38,7 +38,7 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.14.3' = {
   params: {
     name: '${baseName}storage'
     tags: tags
-    allowBlobPublicAccess: false
+    allowBlobPublicAccess: true //is a false here needed?
     defaultToOAuthAuthentication: true // Default to Entra ID Authentication
     supportsHttpsTrafficOnly: true
     kind: 'StorageV2'
