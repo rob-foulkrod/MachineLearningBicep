@@ -52,7 +52,7 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.14.3' = {
     }
     networkAcls: {
       bypass: 'AzureServices'
-      defaultAction: 'Deny'
+      defaultAction: 'Allow'
     }
   }
 }
@@ -83,7 +83,7 @@ module vault 'br/public:avm/res/key-vault/vault:0.11.0' = {
     enableVaultForTemplateDeployment: true
     networkAcls: {
       bypass: 'AzureServices'
-      defaultAction: 'Deny'
+      defaultAction: 'Allow'
     }
     location: location
   }
