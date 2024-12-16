@@ -1,7 +1,7 @@
 param (
-    [string]$resourceGroupName = "aml-rg",
-    [string]$location = "eastus2",
-    [string]$prefix = 'aml'
+    [Alias("g", "resourceGroup")][string]$resourceGroupName = "aml-rg",
+    [Alias("l")][string]$location = "eastus2",
+    [Alias("p")][string]$prefix = 'aml'
 )
 
 
