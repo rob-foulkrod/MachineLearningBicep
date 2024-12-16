@@ -31,7 +31,7 @@ Write-Host "---"
 # Deploy Bicep file
 $deployment = az deployment group create `
     --name $deploymentName --resource-group $resourceGroupName `
-    --template-file $phase1File `
+    --template-file $mainFile `
     --parameters location=$location prefix=$prefix currentUserId=$currentUserId `
     --query "properties.outputs" `
     --output json
