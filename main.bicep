@@ -147,19 +147,10 @@ module workspace 'br/public:avm/res/machine-learning-services/workspace:0.9.0' =
     managedIdentities: {
       systemAssigned: true
     }
+    systemDatastoresAuthMode: 'identity'
     hbiWorkspace: false
     managedNetworkSettings: {
       isolationMode: 'AllowInternetOutbound'
-      // outboundRules: {
-      //   rule: {
-      //     category: 'UserDefined'
-      //     destination: {
-      //       serviceResourceId: storageAccount.outputs.resourceId
-      //       subresourceTarget: 'blob'
-      //     }
-      //     type: 'PrivateEndpoint'
-      //   }
-      // }
     }
   }
 }
