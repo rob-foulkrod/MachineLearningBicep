@@ -102,4 +102,13 @@ write-host "---"
 
 az ml compute restart -n $computeInstanceName -g $resourceGroupName -w $workspaceName
 
+
+# ask the user if they want to add an additional storage account
+$addStorage = Read-Host "Would you like to add permissions for an additional storage account? (y/n)"
+
+if ($addStorage -eq "y") {
+    . ./AddStorage.ps1 -workspaceRGName $resourceGroupName -workspaceName $workspaceName -computeInstanceName $computeInstanceName -userId $userId
+}
+
+
 write-host "Completed deployment"
