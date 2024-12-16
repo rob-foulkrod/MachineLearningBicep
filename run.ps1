@@ -16,6 +16,10 @@ $currentUserId = az ad signed-in-user show --query id -o tsv
 # the script will fail after many minutes if the extension is not installed
 . ./CheckExtensions.ps1 -extensionName "ml"
 
+# check if bicep is installed
+
+. ./CheckBicep.ps1
+
 # Create resource group
 az group create --name $resourceGroupName --location $location
 
