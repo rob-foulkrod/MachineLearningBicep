@@ -86,11 +86,13 @@ $id = az ml compute create --name $computeInstanceName `
     --identity-type SystemAssigned `
     --query "identity.principal_id" --output tsv
 
-write-host "Assigning Storage File Data Privileged Contributor role to the Compute Instance Managed Identity"
-write-host "Command to execute..."
+write-host "Assigning Roles role to the Compute Instance Managed Identity"
+write-host "Commands to execute..."
 write-host "az role assignment create --role 'Storage File Data Privileged Contributor' --assignee $id --scope $storageAccountId"
+write-host "az role assignment create --role 'Storage Blob Data Contributor' --assignee $id --scope $storageAccountId"
 
 az role assignment create --role "Storage File Data Privileged Contributor" --assignee $id --scope $storageAccountId
+az role assignment create --role "Storage Blob Data Contributor" --assignee $id --scope $storageAccountId
 
 write-host "Restarting the Compute Instance"
 write-host "Command to execute..."
