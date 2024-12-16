@@ -4,6 +4,8 @@ param (
     [Alias("p")][string]$prefix = 'aml'
 )
 
+write-host "Workspace Installer (v0.1)"
+write-host ""
 
 # Define variables
 $mainFile = "main.bicep"
@@ -21,7 +23,7 @@ az group create --name $resourceGroupName --location $location
 
 Write-Host "Deploying phase 1 - Creating most Resources"
 Write-Host "Command to execute..."
-Write-Host "az deployment group create --name $deploymentName --resource-group $resourceGroupName --template-file $mainFile --parameters location=$location prefix=$prefix currentUserId=$currentUserId --query properties.outputs --output json"
+Write-Host "az deployment group create --name $deploymentName --resource-group $resourceGroupName --template-file $mainFile --parameters location=$location prefix=$prefix currentUserId=$currentUserId --query 'properties.outputs' --output json"
 
 write-host "Start time: $(Get-Date -Format 'HH:mm:ss')"
 Write-host "Expect this to take approximately 20-25 minutes"
@@ -70,7 +72,10 @@ $computeInstanceName = $prefix + "ci" + (Get-Date -Format 'yyyyMMddHHmmss')
 
 write-host "Creating Compute Instance"
 write-host "Command to execute..."
-write-host "az ml compute create --name $computeInstanceName --resource-group $resourceGroupName --workspace-name $workspaceName --type ComputeInstance --size STANDARD_DS11_V2 --location $location --identity-type SystemAssigned --query identity.principal_id --output tsv"
+write-host "az ml compute create --name $computeInstanceName --resource-group $resourceGroupName --workspace-name $workspaceName --type ComputeInstance --size STANDARD_DS11_V2 --location $location --identity-type SystemAssigned --query 'identity.principal_id' --output tsv"
+write-host "Start time: $(Get-Date -Format 'HH:mm:ss')"
+Write-host "Expect this to take approximately 5 minutes"
+write-host "---"
 
 $id = az ml compute create --name $computeInstanceName `
     --resource-group $resourceGroupName `
@@ -90,6 +95,10 @@ az role assignment create --role "Storage File Data Privileged Contributor" --as
 write-host "Restarting the Compute Instance"
 write-host "Command to execute..."
 write-host "az ml compute restart -n $computeInstanceName -g $resourceGroupName -w $workspaceName"
+write-host "Start time: $(Get-Date -Format 'HH:mm:ss')"
+write-host "Expect this to take approximately 5 minutes"
+write-host "---"
+
 
 az ml compute restart -n $computeInstanceName -g $resourceGroupName -w $workspaceName
 
