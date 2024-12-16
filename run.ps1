@@ -1,11 +1,13 @@
+param (
+    [string]$resourceGroupName = "aml-rg",
+    [string]$location = "eastus2",
+    [string]$prefix = 'aml'
+)
+
+
 # Define variables
-$phase1File = "main.bicep"
-
-
-$resourceGroupName = "test-ml-rg"
-$location = "eastus2"
+$mainFile = "main.bicep"
 $deploymentName = "deploy-ml-$(Get-Date -Format 'yyyyMMddHHmmss')"
-$prefix = 'aml'
 
 # get the current users principal id
 $currentUserId = az ad signed-in-user show --query id -o tsv
@@ -19,7 +21,7 @@ az group create --name $resourceGroupName --location $location
 
 Write-Host "Deploying phase 1 - Creating most Resources"
 Write-Host "Command to execute..."
-Write-Host "az deployment group create --name $deploymentName --resource-group $resourceGroupName --template-file $phase1File --parameters location=$location prefix=$prefix currentUserId=$currentUserId --query properties.outputs --output json"
+Write-Host "az deployment group create --name $deploymentName --resource-group $resourceGroupName --template-file $mainFile --parameters location=$location prefix=$prefix currentUserId=$currentUserId --query properties.outputs --output json"
 
 write-host "Start time: $(Get-Date -Format 'HH:mm:ss')"
 Write-host "Expect this to take approximately 20-25 minutes"
