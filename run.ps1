@@ -4,7 +4,7 @@ param (
     [Alias("p")][string]$prefix = 'aml'
 )
 
-write-host "Workspace Installer (v0.1)"
+write-host "Workspace Installer (v0.2)"
 write-host ""
 
 # Define variables
@@ -38,13 +38,9 @@ $deployment = az deployment group create `
     --query "properties.outputs" `
     --output json
 
-
 write-host "phase 1 outputs"
 write-host $deployment
 Write-Host "---"
-
-$outputs = $deployment | ConvertFrom-Json
-$storageAccountId = $outputs.storageAccountId.value
 
 # get the current subscriptionid
 $subscriptionId = az account show --query id -o tsv
@@ -68,40 +64,8 @@ write-host "---"
 
 az ml workspace update --name $workspaceName --resource-group $resourceGroupName --public-network-access Enabled
 
-$computeInstanceName = $prefix + "ci" + (Get-Date -Format 'yyyyMMddHHmmss')
-
-write-host "Creating Compute Instance"
-write-host "Command to execute..."
-write-host "az ml compute create --name $computeInstanceName --resource-group $resourceGroupName --workspace-name $workspaceName --type ComputeInstance --size STANDARD_DS11_V2 --location $location --identity-type SystemAssigned --query 'identity.principal_id' --output tsv"
-write-host "Start time: $(Get-Date -Format 'HH:mm:ss')"
-Write-host "Expect this to take approximately 5 minutes"
-write-host "---"
-
-$id = az ml compute create --name $computeInstanceName `
-    --resource-group $resourceGroupName `
-    --workspace-name $workspaceName `
-    --type ComputeInstance `
-    --size STANDARD_DS11_V2 `
-    --location $location `
-    --identity-type SystemAssigned `
-    --query "identity.principal_id" --output tsv
-
-write-host "Assigning Roles role to the Compute Instance Managed Identity"
-write-host "Commands to execute..."
-write-host "az role assignment create --role 'Storage File Data Privileged Contributor' --assignee $id --scope $storageAccountId"
-write-host "az role assignment create --role 'Storage Blob Data Contributor' --assignee $id --scope $storageAccountId"
-
-az role assignment create --role "Storage File Data Privileged Contributor" --assignee $id --scope $storageAccountId
-az role assignment create --role "Storage Blob Data Contributor" --assignee $id --scope $storageAccountId
-
-write-host "Restarting the Compute Instance"
-write-host "Command to execute..."
-write-host "az ml compute restart -n $computeInstanceName -g $resourceGroupName -w $workspaceName"
-write-host "Start time: $(Get-Date -Format 'HH:mm:ss')"
-write-host "Expect this to take approximately 5 minutes"
-write-host "---"
-
-
+write-host "Restarting Compute Instance to apply network changes"
+$computeInstanceName = az ml compute list -w $workspaceName -g $resourceGroupName --query [0].name -o tsv
 az ml compute restart -n $computeInstanceName -g $resourceGroupName -w $workspaceName
 
 write-host "Completed deployment"
