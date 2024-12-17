@@ -1,4 +1,4 @@
-Welcome to the Workspace Installer (v0.1). Follow the steps below to deploy this script in your Azure environment.
+Welcome to the Workspace Installer (v0.2). Follow the steps below to deploy this script in your Azure environment.
 
 ## Prerequisites
 
