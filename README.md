@@ -36,8 +36,8 @@ Execute the PowerShell script:
 - **resourceGroupName**: The name of the resource group. Default is `aml-rg`.
 - **location**: The Azure region where the resources will be deployed. Default is `eastus2`.
 - **prefix**: The prefix for naming resources. Default is `aml`.
-
-- **Double check if the storage account access is set to Identity-based access**
+## Post Deployment
+- ** After deployment, double-check if the storage account access is set to Identity-based access**
 - You can find this under Settings > Properties of the AML workspace:
   ![image](https://github.com/user-attachments/assets/aa018202-2185-4de8-a4b9-6c2b84c2b854)
 
