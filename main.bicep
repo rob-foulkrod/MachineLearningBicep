@@ -9,7 +9,22 @@ var tags = {
   DeployedBy: 'Bicep'
 }
 
-//Vnet
+// This Bicep file uses Azure Verified Modules (AVM) to deploy an Azure Machine Learning Workspace with the following resources:
+// - Virtual Network
+// - Storage Account
+// - Container Registry
+// - Key Vault
+// - Application Insights
+// - Virtual Network Gateway
+// - Managed Identity for the Compute Instance
+// - Machine Learning Workspace and a Compute Instance
+// - Role Assignments for the Machine Learning Workspace Identity
+// - Role Assignments for the Compute Instance Identity
+// - Role Assignments for the current user
+
+//Documentation about Azure Verified Modules can be found here:
+//https://azure.github.io/Azure-Verified-Modules/
+
 module virtualNetwork 'br/public:avm/res/network/virtual-network:0.5.1' = {
   name: 'virtualNetworkDeployment'
   params: {
@@ -31,7 +46,16 @@ module virtualNetwork 'br/public:avm/res/network/virtual-network:0.5.1' = {
   }
 }
 
-//Storage Account
+module computeUserAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = {
+  name: 'computeUserAssignedIdentityDeployment'
+  params: {
+    // Required parameters
+    name: '${baseName}computeIdentity'
+    // Non-required parameters
+    location: location
+  }
+}
+
 module storageAccount 'br/public:avm/res/storage/storage-account:0.14.3' = {
   name: 'storageAccountDeployment'
 
@@ -54,10 +78,19 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.14.3' = {
       bypass: 'AzureServices'
       defaultAction: 'Allow'
     }
+    roleAssignments: [
+      {
+        principalId: computeUserAssignedIdentity.outputs.principalId
+        roleDefinitionIdOrName: 'Storage File Data Privileged Contributor'
+      }
+      {
+        principalId: computeUserAssignedIdentity.outputs.principalId
+        roleDefinitionIdOrName: 'Storage Blob Data Contributor'
+      }
+    ]
   }
 }
 
-//container registery
 module registry 'br/public:avm/res/container-registry/registry:0.6.0' = {
   name: 'registryDeployment'
   params: {
@@ -70,7 +103,6 @@ module registry 'br/public:avm/res/container-registry/registry:0.6.0' = {
   }
 }
 
-//Key vault
 module vault 'br/public:avm/res/key-vault/vault:0.11.0' = {
   name: 'vaultDeployment'
   params: {
@@ -141,6 +173,25 @@ module workspace 'br/public:avm/res/machine-learning-services/workspace:0.9.0' =
     associatedKeyVaultResourceId: vault.outputs.resourceId
     associatedStorageAccountResourceId: storageAccount.outputs.resourceId
     associatedContainerRegistryResourceId: registry.outputs.resourceId
+    computes: [
+      {
+        name: 'defaultCompute'
+        computeType: 'ComputeInstance'
+        computeLocation: location
+        location: location
+        description: 'Default Instance'
+        disableLocalAuth: false
+        properties: {
+          vmSize: 'STANDARD_DS11_V2'
+        }
+        managedIdentities: {
+          systemAssigned: false
+          userAssignedResourceIds: [
+            computeUserAssignedIdentity.outputs.resourceId
+          ]
+        }
+      }
+    ]
     location: location
     tags: tags
     publicNetworkAccess: 'Disabled'
@@ -155,22 +206,6 @@ module workspace 'br/public:avm/res/machine-learning-services/workspace:0.9.0' =
   }
 }
 
-//Add the AML Identity's permissions
-
-//Automatically assigned by the system - Commented out
-//Storage Blob Data Contributor: ba92f5b4-2d11-453d-a403-e96b0029c9fe
-// module amlIdentityRoleStorageBlobDataContributor 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.1' = {
-//   name: 'amlIdentityRoleStorageBlobDataContributorDeployment'
-//   params: {
-//     roleName: 'Storage Blob Data Contributor'
-//     description: 'Assign Storage Blob Data Contributor role to the managed Identity on the ML Workspace'
-//     principalId: workspace.outputs.systemAssignedMIPrincipalId!
-//     resourceId: storageAccount.outputs.resourceId
-//     roleDefinitionId: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
-//     principalType: 'ServicePrincipal'
-//   }
-// }
-
 // Storage Table Data Contributor: 0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3
 module amlIdentityRoleStorageTableDataContributor 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.1' = {
   name: 'amlIdentityRoleStorageTableDataContributorDeployment'
@@ -183,20 +218,6 @@ module amlIdentityRoleStorageTableDataContributor 'br/public:avm/ptn/authorizati
     principalType: 'ServicePrincipal'
   }
 }
-
-// Automaitcally assigned by the system - Commented out
-//Storage File Data Privileged Contributor: 69566ab7-960f-475b-8e7c-b3118f30c6bd
-// module amlIdentityRoleStorageFileDataPrivilegedContributor 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.1' = {
-//   name: 'amlIdentityRoleStorageFileDataPrivilegedContributorDeployment'
-//   params: {
-//     roleName: 'Storage File Data Privileged Contributor'
-//     description: 'Assign Storage File Data Privileged Contributor role to the managed Identity on the ML Workspace'
-//     principalId: workspace.outputs.systemAssignedMIPrincipalId!
-//     resourceId: storageAccount.outputs.resourceId
-//     roleDefinitionId: '69566ab7-960f-475b-8e7c-b3118f30c6bd'
-//     principalType: 'ServicePrincipal'
-//   }
-// }
 
 // All three assignments now for the current user
 module currentUserRoleStorageBlobDataContributor 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.1' = {
