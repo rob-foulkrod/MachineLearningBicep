@@ -64,9 +64,6 @@ write-host "---"
 
 az ml workspace update --name $workspaceName --resource-group $resourceGroupName --public-network-access Enabled
 
-write-host "Restarting Compute Instance to apply network changes"
-$computeInstanceName = az ml compute list -w $workspaceName -g $resourceGroupName --query [0].name -o tsv
-az ml compute restart -n $computeInstanceName -g $resourceGroupName -w $workspaceName
 
 
 # ask the user if they want to add an additional storage account
