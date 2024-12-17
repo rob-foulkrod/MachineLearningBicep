@@ -38,7 +38,6 @@ $deployment = az deployment group create `
     --query "properties.outputs" `
     --output json | ConvertFrom-Json
 
-
 write-host "phase 1 outputs"
 write-host $deployment
 Write-Host "---"

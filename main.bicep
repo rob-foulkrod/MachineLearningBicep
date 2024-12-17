@@ -177,6 +177,7 @@ module workspace 'br/public:avm/res/machine-learning-services/workspace:0.9.0' =
     associatedContainerRegistryResourceId: registry.outputs.resourceId
     computes: [
       {
+
         name: instanceName
         computeType: 'ComputeInstance'
         computeLocation: location
