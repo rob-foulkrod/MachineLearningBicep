@@ -164,6 +164,8 @@ module virtualNetworkGateway 'br/public:avm/res/network/virtual-network-gateway:
   }
 }
 
+var instanceName = substring(baseName, 0, 6)
+
 module workspace 'br/public:avm/res/machine-learning-services/workspace:0.9.0' = {
   name: 'workspaceDeployment'
   params: {
@@ -175,7 +177,8 @@ module workspace 'br/public:avm/res/machine-learning-services/workspace:0.9.0' =
     associatedContainerRegistryResourceId: registry.outputs.resourceId
     computes: [
       {
-        name: substring(baseName, 0, 6)
+
+        name: instanceName
         computeType: 'ComputeInstance'
         computeLocation: location
         location: location
@@ -258,6 +261,7 @@ module currentUserRoleStorageFileDataPrivilegedContributor 'br/public:avm/ptn/au
 
 output amlWorkspaceId string = workspace.outputs.resourceId
 output amlWorkspaceName string = workspace.outputs.name
+output amlWorkspaceComputeName string = instanceName
 output storageAccountId string = storageAccount.outputs.resourceId
 output keyVaultId string = vault.outputs.resourceId
 output vnetId string = virtualNetwork.outputs.resourceId

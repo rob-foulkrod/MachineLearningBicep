@@ -36,7 +36,7 @@ $deployment = az deployment group create `
     --template-file $mainFile `
     --parameters location=$location prefix=$prefix currentUserId=$currentUserId `
     --query "properties.outputs" `
-    --output json
+    --output json | ConvertFrom-Json
 
 write-host "phase 1 outputs"
 write-host $deployment
