@@ -36,7 +36,8 @@ $deployment = az deployment group create `
     --template-file $mainFile `
     --parameters location=$location prefix=$prefix currentUserId=$currentUserId `
     --query "properties.outputs" `
-    --output json
+    --output json | ConvertFrom-Json
+
 
 write-host "phase 1 outputs"
 write-host $deployment
@@ -63,15 +64,6 @@ write-host "az ml workspace update --name $workspaceName --resource-group $resou
 write-host "---"
 
 az ml workspace update --name $workspaceName --resource-group $resourceGroupName --public-network-access Enabled
-
-
-
-# ask the user if they want to add an additional storage account
-$addStorage = Read-Host "Would you like to add permissions for an additional storage account? (y/n)"
-
-if ($addStorage -eq "y") {
-    . ./AddStorage.ps1 -workspaceRGName $resourceGroupName -workspaceName $workspaceName -computeInstanceName $computeInstanceName -userId $userId
-}
 
 
 write-host "Completed deployment"
