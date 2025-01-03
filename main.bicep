@@ -142,13 +142,12 @@ module component 'br/public:avm/res/insights/component:0.4.2' = {
 
 module virtualNetworkGateway 'br/public:avm/res/network/virtual-network-gateway:0.5.0' = {
   name: 'virtualNetworkGatewayDeployment'
-  scope: rg
   params: {
     clusterSettings: {
       clusterMode: 'activePassiveNoBgp'
     }
     gatewayType: 'Vpn'
-    name: '${abbrs.networkVpnGateways}${resourceToken}'
+    name: '${baseName}gateway'
     tags: tags
     vNetResourceId: virtualNetwork.outputs.resourceId
     allowRemoteVnetTraffic: true
