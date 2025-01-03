@@ -144,10 +144,11 @@ module virtualNetworkGateway 'br/public:avm/res/network/virtual-network-gateway:
   name: 'virtualNetworkGatewayDeployment'
   params: {
     clusterSettings: {
-      clusterMode: 'activeActiveNoBgp'
+      clusterMode: 'activePassiveNoBgp'
     }
     gatewayType: 'Vpn'
     name: '${baseName}gateway'
+    tags: tags
     vNetResourceId: virtualNetwork.outputs.resourceId
     allowRemoteVnetTraffic: true
     disableIPSecReplayProtection: true
@@ -155,14 +156,13 @@ module virtualNetworkGateway 'br/public:avm/res/network/virtual-network-gateway:
     enablePrivateIpAddress: true
 
     location: location
-    publicIpZones: [
-      1
-    ]
-    skuName: 'VpnGw2AZ'
-    vpnGatewayGeneration: 'Generation2'
+    publicIpZones: []
+    skuName: 'VpnGw1'
+    vpnGatewayGeneration: 'Generation1'
     vpnType: 'RouteBased'
   }
 }
+
 
 var instanceName = substring(baseName, 0, 6)
 
