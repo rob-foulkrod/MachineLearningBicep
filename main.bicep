@@ -142,12 +142,14 @@ module component 'br/public:avm/res/insights/component:0.4.2' = {
 
 module virtualNetworkGateway 'br/public:avm/res/network/virtual-network-gateway:0.5.0' = {
   name: 'virtualNetworkGatewayDeployment'
+  scope: rg
   params: {
     clusterSettings: {
-      clusterMode: 'activeActiveNoBgp'
+      clusterMode: 'activePassiveNoBgp'
     }
     gatewayType: 'Vpn'
-    name: '${baseName}gateway'
+    name: '${abbrs.networkVpnGateways}${resourceToken}'
+    tags: tags
     vNetResourceId: virtualNetwork.outputs.resourceId
     allowRemoteVnetTraffic: true
     disableIPSecReplayProtection: true
@@ -155,10 +157,8 @@ module virtualNetworkGateway 'br/public:avm/res/network/virtual-network-gateway:
     enablePrivateIpAddress: true
 
     location: location
-    publicIpZones: [
-      1
-    ]
-    skuName: 'VpnGw2AZ'
+    publicIpZones: []
+    skuName: 'VpnGw2'
     vpnGatewayGeneration: 'Generation2'
     vpnType: 'RouteBased'
   }
